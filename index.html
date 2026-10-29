@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AdSwap - Public Monetag & Universal SDK Exchange</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Firebase JS SDKs (v10 Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+  <style>
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 12px rgba(99, 102, 241, 0.4); }
+      50% { box-shadow: 0 0 24px rgba(99, 102, 241, 0.8); }
+    }
+    .glow-active {
+      animation: pulseGlow 2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
+
+  <!-- HEADER NAVBAR -->
+  <header class="bg-slate-900/90 backdrop-blur sticky top-0 z-40 border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+          <i class="fa-solid fa-bolt text-lg"></i>
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold tracking-tight text-white flex items-center gap-2">
+            AdSwap <span class="text-[10px] bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded-full font-mono uppercase">Universal SDK</span>
+          </h1>
+          <p class="text-[11px] text-slate-400">Public Monetag & Ad Exchange Network</p>
+        </div>
+      </div>
+
+      <!-- User Stats & Actions -->
+      <div class="flex items-center space-x-3 sm:space-x-4">
+        <!-- Balance Pill -->
+        <div class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 flex items-center space-x-2">
+          <i class="fa-solid fa-coins text-amber-400 text-sm"></i>
+          <span class="text-xs text-slate-400 hidden sm:inline">Balance:</span>
+          <span id="headerCredits" class="text-sm font-bold text-amber-300">1</span>
+        </div>
+
+        <!-- User Profile Button -->
+        <button id="btnProfileModal" class="flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-200 transition">
+          <i class="fa-solid fa-user-circle text-indigo-400 text-base"></i>
+          <span id="headerUsername" class="max-w-[80px] sm:max-w-[120px] truncate">User</span>
+        </button>
+
+        <!-- Post Task Button -->
+        <button id="btnOpenCreateModal" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-xl shadow-lg shadow-indigo-600/30 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-plus"></i>
+          <span class="hidden sm:inline">Post Ad</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN PUBLIC CONTENT -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- WELCOME & INSTRUCTION BANNER -->
+    <div class="bg-gradient-to-r from-indigo-950/80 via-slate-900 to-slate-950 border border-indigo-500/30 rounded-2xl p-5 sm:p-6 mb-8 shadow-2xl relative overflow-hidden">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-5 relative z-10">
+        <div class="space-y-1.5">
+          <span class="text-[11px] uppercase tracking-wider text-indigo-400 font-bold flex items-center gap-1.5">
+            <i class="fa-solid fa-code text-indigo-400"></i> Any SDK Tag Supported • 100% Dynamic Loading
+          </span>
+          <h2 class="text-xl sm:text-2xl font-extrabold text-white">Public Ad Exchange Community Feed</h2>
+          <p class="text-xs sm:text-sm text-slate-300 max-w-2xl">
+            You start with <strong class="text-amber-400">1 Credit</strong>. Paste any Monetag script tag, zone ID, or custom SDK code to post in the public area. Watch 5 Rewarded Interstitials + 1 Popup on public posts to earn <strong class="text-emerald-400">+1 Credit</strong>!
+          </p>
+        </div>
+
+        <!-- Quick Rules Card -->
+        <div class="grid grid-cols-3 gap-2 bg-slate-950/80 p-3 rounded-xl border border-slate-800 text-center min-w-[260px]">
+          <div>
+            <span class="text-[11px] text-slate-400 block">Post Fee</span>
+            <span class="text-sm font-bold text-rose-400">-1 Credit</span>
+          </div>
+          <div class="border-x border-slate-800">
+            <span class="text-[11px] text-slate-400 block">Public Limit</span>
+            <span class="text-sm font-bold text-indigo-400">10 Views</span>
+          </div>
+          <div>
+            <span class="text-[11px] text-slate-400 block">Earn Rate</span>
+            <span class="text-sm font-bold text-emerald-400">+1 Credit</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILTER & REFRESH BAR -->
+    <div class="flex items-center justify-between mb-6">
+      <div class="flex space-x-2">
+        <button id="tabAvailable" class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-md transition">
+          Public Feed (<span id="countAvailable">0</span>)
+        </button>
+        <button id="tabCompleted" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800 rounded-xl text-xs sm:text-sm font-semibold transition">
+          Completed Posts
+        </button>
+      </div>
+
+      <button id="btnRefresh" class="text-slate-400 hover:text-white p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 transition" title="Refresh Feed">
+        <i class="fa-solid fa-rotate-right"></i>
+      </button>
+    </div>
+
+    <!-- PUBLIC TASK GRID -->
+    <div id="tasksGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <!-- Loading Skeleton -->
+      <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 animate-pulse space-y-4">
+        <div class="h-4 bg-slate-800 rounded w-1/3"></div>
+        <div class="h-6 bg-slate-800 rounded w-3/4"></div>
+        <div class="h-16 bg-slate-800/60 rounded"></div>
+        <div class="h-10 bg-slate-800 rounded"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- MODAL 1: POST MONETAG / ANY SDK TASK -->
+  <div id="modalCreateTask" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
+      <button id="btnCloseCreateModal" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-code"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-white">Post Any Monetag / SDK Tag</h3>
+          <p class="text-xs text-slate-400">Consumes 1 Credit • Publicly visible to 10 users</p>
+        </div>
+      </div>
+
+      <form id="formCreateTask" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Post Title / Description</label>
+          <input type="text" id="taskTitle" required placeholder="e.g. Monetag 5 Interstitial + 1 Popup Zone" 
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">
+            Paste SDK Script Tag or Zone ID
+          </label>
+          <textarea id="taskSdkSnippet" rows="4" required placeholder="Paste full script code, e.g.:
+<script src='//libtl.com/sdk.js' data-zone='10555663' data-sdk='show_10555663'></script>
+
+Or simply paste function / zone ID:
+show_10555663"
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-emerald-400 focus:outline-none focus:border-indigo-500"></textarea>
+          <p class="text-[11px] text-slate-400 mt-1">
+            <i class="fa-solid fa-circle-check text-emerald-400"></i> Accepts any <code>&lt;script&gt;</code> tag, Monetag dynamic SDK, or Zone ID. Loaded into DOM runtime automatically.
+          </p>
+        </div>
+
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs space-y-1.5">
+          <div class="font-semibold text-indigo-300 flex items-center gap-1">
+            <i class="fa-solid fa-shield"></i> Automatic Execution Protocol:
+          </div>
+          <ul class="list-disc list-inside text-slate-400 text-[11px] space-y-0.5">
+            <li>5 &times; Rewarded Interstitials (<code class="text-amber-300">show_XXXXX()</code>)</li>
+            <li>1 &times; Rewarded Popup (<code class="text-amber-300">show_XXXXX('pop')</code>)</li>
+            <li>Posted to public area for up to 10 unique user completions</li>
+          </ul>
+        </div>
+
+        <div class="flex items-center justify-between pt-3 border-t border-slate-800">
+          <div class="text-xs text-slate-400">
+            Cost: <strong class="text-rose-400">1 Credit</strong> (Balance: <span id="modalBalance" class="text-amber-300">1</span>)
+          </div>
+          <button type="submit" id="btnSubmitTask" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs sm:text-sm px-5 py-2.5 rounded-xl shadow-lg transition">
+            Publish Post (-1 Credit)
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: ACTIVE AD TASK RUNNER -->
+  <div id="modalTaskRunner" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-lg p-6 sm:p-7 shadow-2xl relative text-center">
+      <button id="btnCloseRunnerModal" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <span class="inline-block px-3 py-1 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-full text-[11px] font-semibold mb-2">
+        Monetag Live Runtime Session
+      </span>
+      <h3 id="runnerTaskTitle" class="text-lg sm:text-xl font-bold text-white mb-1">Watch Ads to Earn Credit</h3>
+      <p class="text-xs text-slate-400 mb-5">Dynamic SDK dynamically injected without hardcoded page scripts.</p>
+
+      <!-- Overall Step Counter -->
+      <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 mb-5">
+        <div class="flex justify-between text-xs text-slate-400 font-medium mb-1.5">
+          <span>Session Progress</span>
+          <span id="runnerOverallText" class="text-indigo-400 font-bold">0 / 6</span>
+        </div>
+        <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
+          <div id="runnerProgressBar" class="bg-indigo-500 h-full w-0 transition-all duration-300"></div>
+        </div>
+      </div>
+
+      <!-- Action 1: 5x Rewarded Interstitials -->
+      <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 mb-3 text-left">
+        <div class="flex justify-between items-center mb-2.5">
+          <div>
+            <span class="text-[10px] uppercase font-bold text-indigo-400 tracking-wider">Step 1</span>
+            <h4 class="text-xs sm:text-sm font-semibold text-white">Rewarded Interstitial (5 Times)</h4>
+          </div>
+          <span id="interstitialBadge" class="text-xs px-2.5 py-0.5 bg-slate-800 text-indigo-300 rounded-md font-mono">
+            0 / 5
+          </span>
+        </div>
+
+        <button id="btnTriggerInterstitial" class="w-full py-3 px-4 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white rounded-xl font-semibold text-xs sm:text-sm shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition">
+          <i class="fa-solid fa-play"></i>
+          <span id="btnInterstitialText">Watch Rewarded Interstitial (<span id="interstitialCount">0</span>/5)</span>
+        </button>
+      </div>
+
+      <!-- Action 2: 1x Rewarded Popup -->
+      <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 mb-5 text-left">
+        <div class="flex justify-between items-center mb-2.5">
+          <div>
+            <span class="text-[10px] uppercase font-bold text-indigo-400 tracking-wider">Step 2</span>
+            <h4 class="text-xs sm:text-sm font-semibold text-white">Rewarded Popup (1 Time)</h4>
+          </div>
+          <span id="popupBadge" class="text-xs px-2.5 py-0.5 bg-slate-800 text-indigo-300 rounded-md font-mono">
+            0 / 1
+          </span>
+        </div>
+
+        <button id="btnTriggerPopup" disabled class="w-full py-3 px-4 bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-700 text-slate-200 rounded-xl font-semibold text-xs sm:text-sm border border-slate-700 flex items-center justify-center gap-2 transition">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          <span id="btnPopupText">Watch Rewarded Popup (Complete Step 1 First)</span>
+        </button>
+      </div>
+
+      <!-- Claim Button -->
+      <button id="btnClaimReward" disabled class="w-full py-3.5 bg-emerald-600 disabled:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-emerald-500 text-white font-bold rounded-2xl text-sm sm:text-base shadow-lg transition flex items-center justify-center gap-2">
+        <i class="fa-solid fa-gift"></i>
+        <span>Claim +1 Credit</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL 3: PROFILE & EDIT DISPLAY NAME -->
+  <div id="modalProfile" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
+      <button id="btnCloseProfileModal" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-5">
+        <div class="w-11 h-11 rounded-2xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center text-xl">
+          <i class="fa-solid fa-user-pen"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-white">User Profile</h3>
+          <p class="text-xs text-slate-400">Change your public profile name</p>
+        </div>
+      </div>
+
+      <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 mb-5 space-y-2.5">
+        <div class="flex justify-between items-center text-xs">
+          <span class="text-slate-400">Firebase User ID</span>
+          <span id="profileUid" class="font-mono text-slate-300 select-all">Loading...</span>
+        </div>
+        <div class="flex justify-between items-center text-xs">
+          <span class="text-slate-400">Credit Balance</span>
+          <span id="profileCredits" class="font-bold text-amber-300 text-sm">1 Credit</span>
+        </div>
+        <div class="flex justify-between items-center text-xs">
+          <span class="text-slate-400">Tasks Completed</span>
+          <span id="profileCompletedCount" class="font-bold text-indigo-400">0</span>
+        </div>
+      </div>
+
+      <form id="formChangeName" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Display Name</label>
+          <input type="text" id="profileDisplayName" required minlength="2" maxlength="25"
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500" />
+        </div>
+        <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs sm:text-sm rounded-xl transition">
+          Save Profile Name
+        </button>
+      </form>
+
+      <!-- Dev/Test Faucet -->
+      <div class="mt-4 pt-3 border-t border-slate-800 text-center">
+        <button id="btnClaimFreeCoins" class="text-xs text-amber-400 hover:text-amber-300 underline font-medium">
+          Need coins to test? +3 Free Test Credits
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+  <!-- Main JavaScript Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
