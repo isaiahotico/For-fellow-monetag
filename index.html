@@ -1,0 +1,347 @@
+<!-- Tailwind CSS & FontAwesome -->
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+<!-- Firebase App & Services (v9/v10 Compat for Blogger compatibility) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+<div class="bg-slate-950 text-slate-100 min-h-screen p-4 sm:p-6 font-sans">
+  <div class="max-w-4xl mx-auto space-y-6">
+
+    <!-- Header Section -->
+    <header class="flex flex-col sm:flex-row justify-between items-center bg-slate-900/80 backdrop-blur p-5 rounded-2xl shadow-xl border border-slate-800">
+      <div class="flex items-center space-x-3 mb-4 sm:mb-0">
+        <div class="bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/20">
+          <i class="fa-solid fa-wallet text-2xl text-emerald-400"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight">CryptoHub Firebase</h1>
+          <p class="text-xs text-slate-400">Deposit Merchant: <span class="text-emerald-400 font-semibold">@isaiahotico</span></p>
+        </div>
+      </div>
+      <div id="authHeader" class="text-right hidden">
+        <div class="text-xs text-slate-400">Logged as: <span id="userEmailSpan" class="font-bold text-white"></span></div>
+        <button onclick="handleLogout()" class="mt-1 text-xs bg-red-500/20 hover:bg-red-500 text-red-300 hover:text-white px-3 py-1 rounded-lg border border-red-500/30 transition">Logout</button>
+      </div>
+    </header>
+
+    <!-- Auth Box (Sign In / Register) -->
+    <div id="authSection" class="bg-slate-900 p-8 rounded-2xl border border-slate-800 shadow-2xl max-w-md mx-auto">
+      <div class="flex border-b border-slate-800 mb-6">
+        <button id="tabLogin" onclick="switchAuthTab('login')" class="w-1/2 pb-3 font-semibold text-emerald-400 border-b-2 border-emerald-400">Sign In</button>
+        <button id="tabRegister" onclick="switchAuthTab('register')" class="w-1/2 pb-3 font-semibold text-slate-400 hover:text-white">Register</button>
+      </div>
+
+      <form id="authForm" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs uppercase font-medium text-slate-400 mb-1">Email Address</label>
+          <input type="email" id="authEmail" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-emerald-500 transition"/>
+        </div>
+        <div>
+          <label class="block text-xs uppercase font-medium text-slate-400 mb-1">Password</label>
+          <input type="password" id="authPassword" required minlength="6" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-emerald-500 transition"/>
+        </div>
+        <button type="submit" id="authSubmitBtn" class="w-full bg-emerald-500 hover:bg-emerald-600 font-bold py-3 rounded-xl text-slate-950 transition shadow-lg shadow-emerald-500/20">Sign In</button>
+      </form>
+    </div>
+
+    <!-- Dashboard Section -->
+    <div id="dashboardSection" class="hidden space-y-6">
+
+      <!-- Balance & Action Row -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-gradient-to-br from-slate-900 to-slate-950 p-6 rounded-2xl border border-slate-800 md:col-span-1 flex flex-col justify-between shadow-lg">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs uppercase tracking-wider text-slate-400 font-semibold">USD Balance</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Realtime</span>
+            </div>
+            <div class="text-4xl font-extrabold text-white mt-3">$<span id="balValue" class="text-emerald-400">0.00</span></div>
+          </div>
+          <div class="text-xs text-slate-500 mt-4">Synced via Firebase Realtime Database</div>
+        </div>
+
+        <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Deposit Card -->
+          <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between">
+            <div>
+              <h3 class="text-base font-bold flex items-center gap-2"><i class="fa-solid fa-circle-down text-emerald-400"></i> Deposit Any Coin</h3>
+              <p class="text-xs text-slate-400 mt-1">Pay with BTC, USDT, TRX, LTC, etc. (No minimum). Automatically converted to USD.</p>
+            </div>
+            <button onclick="toggleModal('depositModal', true)" class="mt-4 w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-2.5 rounded-xl transition">Deposit via FaucetPay</button>
+          </div>
+
+          <!-- Withdraw Card -->
+          <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between">
+            <div>
+              <h3 class="text-base font-bold flex items-center gap-2"><i class="fa-solid fa-circle-up text-amber-400"></i> Withdraw USDT</h3>
+              <p class="text-xs text-slate-400 mt-1">Instant automatic payout to your FaucetPay linked USDT address.</p>
+            </div>
+            <button onclick="toggleModal('withdrawModal', true)" class="mt-4 w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2.5 rounded-xl transition">Withdraw USDT</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Transaction History -->
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
+        <div class="p-5 border-b border-slate-800 flex justify-between items-center">
+          <h2 class="font-bold text-base flex items-center gap-2"><i class="fa-solid fa-list-check text-slate-400"></i> Realtime Transaction History</h2>
+          <span class="text-xs text-slate-400">Auto-refreshed</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm text-slate-300">
+            <thead class="bg-slate-950 text-slate-400 text-xs uppercase">
+              <tr>
+                <th class="p-4">Transaction ID</th>
+                <th class="p-4">Type</th>
+                <th class="p-4">USD Value</th>
+                <th class="p-4">Details</th>
+                <th class="p-4">Status</th>
+                <th class="p-4">Date</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody" class="divide-y divide-slate-800">
+              <tr>
+                <td colspan="6" class="p-6 text-center text-slate-500">Listening for transactions...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Deposit -->
+<div id="depositModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+  <div class="bg-slate-900 rounded-2xl border border-slate-800 max-w-md w-full p-6 space-y-4">
+    <div class="flex justify-between items-center">
+      <h3 class="text-lg font-bold">Deposit with FaucetPay</h3>
+      <button onclick="toggleModal('depositModal', false)" class="text-slate-400 hover:text-white text-xl">&times;</button>
+    </div>
+    <div class="space-y-3 text-sm text-slate-300">
+      <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+        <p class="text-xs text-slate-400">Merchant Recipient:</p>
+        <p class="text-emerald-400 font-bold text-base">@isaiahotico</p>
+      </div>
+      <p class="text-xs text-slate-400 leading-relaxed">
+        Choose any crypto on FaucetPay checkout. No minimum requirement. The equivalent value in USD will be credited to your account automatically upon confirmation.
+      </p>
+
+      <form action="https://faucetpay.io/merchant/webscr" method="post" target="_blank" class="space-y-3">
+        <input type="hidden" name="merchant_username" value="isaiahotico">
+        <input type="hidden" name="item_name" value="Account Credit">
+        <input type="hidden" id="depositCustomUid" name="custom" value="">
+        <input type="hidden" name="currency1" value="USD">
+        <div>
+          <label class="block text-xs uppercase text-slate-400 mb-1">Deposit Amount (USD)</label>
+          <input type="number" step="0.01" min="0.01" name="amount1" placeholder="e.g. 5.00" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-emerald-500"/>
+        </div>
+        <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 rounded-xl transition">
+          Continue to FaucetPay
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Withdraw -->
+<div id="withdrawModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+  <div class="bg-slate-900 rounded-2xl border border-slate-800 max-w-md w-full p-6 space-y-4">
+    <div class="flex justify-between items-center">
+      <h3 class="text-lg font-bold">Instant USDT Withdrawal</h3>
+      <button onclick="toggleModal('withdrawModal', false)" class="text-slate-400 hover:text-white text-xl">&times;</button>
+    </div>
+    <form id="withdrawForm" onsubmit="handleWithdrawSubmit(event)" class="space-y-4">
+      <div>
+        <label class="block text-xs uppercase text-slate-400 mb-1">FaucetPay USDT Address or Linked Email</label>
+        <input type="text" id="withdrawAddress" required placeholder="e.g. FaucetPay Email or TRC20 Address" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-amber-500"/>
+      </div>
+      <div>
+        <label class="block text-xs uppercase text-slate-400 mb-1">Amount ($ USD)</label>
+        <input type="number" step="0.01" min="0.10" id="withdrawAmount" required placeholder="0.00" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-amber-500"/>
+      </div>
+      <button type="submit" id="btnSubmitWithdraw" class="w-full bg-amber-500 hover:bg-amber-600 font-bold py-3 rounded-xl text-slate-950 transition">Confirm Automated Payout</button>
+    </form>
+  </div>
+</div>
+
+<script>
+// --- FIREBASE CONFIGURATION ---
+const firebaseConfig = {
+    apiKey: "AIzaSyBwpa8mA83JAv2A2Dj0rh5VHwodyv5N3dg",
+    authDomain: "freegcash-ads.firebaseapp.com",
+    databaseURL: "https://freegcash-ads-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "freegcash-ads",
+    storageBucket: "freegcash-ads.firebasestorage.app",
+    messagingSenderId: "608086825364",
+    appId: "1:608086825364:web:3a8e628d231b52c6171781"
+};
+
+// Initialize Firebase
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+const auth = firebase.auth();
+const database = firebase.database();
+
+// BACKEND MIDDLEWARE URL (Google Apps Script Web App URL from Step 1)
+const BACKEND_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL";
+
+let activeAuthMode = "login";
+let currentUser = null;
+
+// Auth Tab Switching
+function switchAuthTab(mode) {
+  activeAuthMode = mode;
+  document.getElementById("tabLogin").className = mode === "login" 
+    ? "w-1/2 pb-3 font-semibold text-emerald-400 border-b-2 border-emerald-400" 
+    : "w-1/2 pb-3 font-semibold text-slate-400 hover:text-white";
+  document.getElementById("tabRegister").className = mode === "register" 
+    ? "w-1/2 pb-3 font-semibold text-emerald-400 border-b-2 border-emerald-400" 
+    : "w-1/2 pb-3 font-semibold text-slate-400 hover:text-white";
+  document.getElementById("authSubmitBtn").innerText = mode === "login" ? "Sign In" : "Create Account";
+}
+
+// Authentication Handler
+async function handleAuthSubmit(e) {
+  e.preventDefault();
+  const email = document.getElementById("authEmail").value.trim();
+  const password = document.getElementById("authPassword").value;
+  const btn = document.getElementById("authSubmitBtn");
+
+  btn.disabled = true;
+  btn.innerText = "Processing...";
+
+  try {
+    if (activeAuthMode === "register") {
+      const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+      const user = userCredential.user;
+      // Initialize balance in Realtime DB
+      await database.ref('users/' + user.uid).set({
+        email: user.email,
+        balance_usd: 0.00,
+        createdAt: firebase.database.ServerValue.TIMESTAMP
+      });
+      alert("Registration successful! Welcome.");
+    } else {
+      await auth.signInWithEmailAndPassword(email, password);
+    }
+  } catch (error) {
+    alert("Authentication Error: " + error.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerText = activeAuthMode === "login" ? "Sign In" : "Create Account";
+  }
+}
+
+// Firebase Auth State Listener
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    currentUser = user;
+    document.getElementById("authSection").classList.add("hidden");
+    document.getElementById("dashboardSection").classList.remove("hidden");
+    document.getElementById("authHeader").classList.remove("hidden");
+    document.getElementById("userEmailSpan").innerText = user.email;
+    document.getElementById("depositCustomUid").value = user.uid;
+
+    attachRealtimeListeners(user.uid);
+  } else {
+    currentUser = null;
+    document.getElementById("authSection").classList.remove("hidden");
+    document.getElementById("dashboardSection").classList.add("hidden");
+    document.getElementById("authHeader").classList.add("hidden");
+  }
+});
+
+// Attach Firebase Realtime Listeners
+function attachRealtimeListeners(uid) {
+  // 1. Realtime Balance Listener
+  database.ref('users/' + uid + '/balance_usd').on('value', (snapshot) => {
+    const bal = snapshot.val() || 0;
+    document.getElementById("balValue").innerText = parseFloat(bal).toFixed(2);
+  });
+
+  // 2. Realtime History Listener
+  database.ref('history/' + uid).orderByChild('timestamp').on('value', (snapshot) => {
+    const list = [];
+    snapshot.forEach((child) => {
+      list.unshift(child.val());
+    });
+    renderHistory(list);
+  });
+}
+
+function renderHistory(list) {
+  const tbody = document.getElementById("historyTableBody");
+  if (!list || list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-500">No transactions recorded yet.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map(item => `
+    <tr class="hover:bg-slate-800/50 transition">
+      <td class="p-4 font-mono text-xs text-slate-400">${item.tx_id.substring(0, 12)}...</td>
+      <td class="p-4">
+        <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${item.type === 'DEPOSIT' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}">
+          ${item.type}
+        </span>
+      </td>
+      <td class="p-4 font-semibold text-white">$${parseFloat(item.amount_usd).toFixed(2)}</td>
+      <td class="p-4 text-xs text-slate-400">${item.crypto_amount || item.amount_usd} ${item.crypto_currency}</td>
+      <td class="p-4"><span class="text-xs bg-slate-800 px-2.5 py-0.5 rounded text-emerald-400 font-medium">${item.status}</span></td>
+      <td class="p-4 text-xs text-slate-400">${new Date(item.timestamp).toLocaleString()}</td>
+    </tr>
+  `).join("");
+}
+
+// Automated USDT Withdrawal Handler
+async function handleWithdrawSubmit(e) {
+  e.preventDefault();
+  if (!currentUser) return;
+
+  const address = document.getElementById("withdrawAddress").value.trim();
+  const amount = parseFloat(document.getElementById("withdrawAmount").value);
+  const btn = document.getElementById("btnSubmitWithdraw");
+
+  btn.disabled = true;
+  btn.innerText = "Processing Instant USDT...";
+
+  try {
+    const res = await fetch(BACKEND_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "withdraw",
+        uid: currentUser.uid,
+        amount_usd: amount,
+        address: address
+      })
+    });
+    const result = await res.json();
+
+    if (result.status === "success") {
+      alert("Success! " + result.message);
+      toggleModal("withdrawModal", false);
+      document.getElementById("withdrawForm").reset();
+    } else {
+      alert("Error: " + result.message);
+    }
+  } catch (err) {
+    alert("Connection error during withdrawal request.");
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "Confirm Automated Payout";
+  }
+}
+
+function handleLogout() {
+  auth.signOut();
+}
+
+function toggleModal(id, show) {
+  document.getElementById(id).classList.toggle("hidden", !show);
+}
+</script>
